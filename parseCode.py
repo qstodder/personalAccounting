@@ -3,20 +3,21 @@ import pandas as pd
 import os
 
 statements = r'/Users/quiana/Documents/PersonalFinances/accounting 2.0/statements'
-keysDict = {
-    "groceriesKey":     ["trader joe's", "ralphs", "vons", "myprotein"],
-    "housingKey":       ["premiere", "canyon park", "time warner", "sd gas", "wifi", "rent"],
-    "gasKey":           ["rotten robbie", "7-eleven", "raley's", "valero", "chevron", "arco", "shell", "stars & stripes"],
-    "necesitiesKey":    ["bookstore", "walmart", "toyota", "cvs", "cyclery"],
-    "adventuresKey":    ["rei", "mesa", "recreation"],
-    "funFoodKey":       ["fairbanks", "hdh", "bombay coast", "restaurants"],
-    "giftsKey":         ["gofundme", "wpy"],
-    "shoppingKey":      ["marshalls", "ross", "nordstrom"],
-    "entertainmentKey": ["cinemas"],
-    "incomeKey":        ["pasqual", "ucsd apach", "ucsd payrl", "asml", "interest", "deposit"]
-}
 
-keys = pd.DataFrame(data=keysDict)
+groceriesKey = ["trader joe's", "ralphs", "vons", "myprotein"]
+housingKey =   ["premiere", "canyon park", "time warner", "sd gas", "wifi", "rent"]
+gasKey = ["rotten robbie", "7-eleven", "raley's", "valero", "chevron", "arco", "shell", "stars & stripes"]
+necesitiesKey = ["bookstore", "walmart", "toyota", "cvs", "cyclery"]
+adventuresKey = ["rei", "mesa", "recreation"]
+funFoodKey = ["fairbanks", "hdh", "bombay coast", "restaurants"]
+giftsKey = ["gofundme", "wpy"]
+shoppingKey = ["marshalls", "ross", "nordstrom"]
+entertainmentKey = ["cinemas"]
+incomeKey = ["pasqual", "ucsd apach", "ucsd payrl", "asml", "interest", "deposit"]
+
+keys = [groceriesKey, housingKey, gasKey, necesitiesKey, adventuresKey, funFoodKey, giftsKey, shoppingKey, entertainmentKey, incomeKey]
+
+print(len(keys))
 
 # venmo sorter
 # def venmo(file):
@@ -30,21 +31,26 @@ def debit(file):
     outTable = pd.DataFrame(index=range(len(df.index)-1), columns=['Date', 'Source', 'Description', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Notes'])
     print(outTable.head())
     skip=["venmo", "discover e-payment"]
-    for index, row in df.iterrows():
-        if(x in row[4] for i, x in enumerate(skip)):
-            continue
-        elif (x in row[4] for i, x in enumerate(groceriesKey)):
-            outTable['Date'], outTable['Description'], outTable['Groceries'] = df[0], grocerisKey, df[1]
-        elif (x in row[4] for i, x in enumerate(housingKey)):
-            outTable['Date'], outTable['Description'], outTable['Housing'] = df[0], df[4], df[1]
-        elif (x in row[4] for i, x in enumerate(gasKey)):
-            outTable['Date'], outTable['Description'], outTable['Gas'] = df[0], df[4], df[1]
-        elif (x in row[4] for i, x in enumerate(necesitiesKey)):
-            outTable['Date'], outTable['Description'], outTable['Necesities'] = df[0], df[4], df[1]
-        elif (x in row[4] for i, x in enumerate(adventuresKey)):
-            outTable['Date'], outTable['Description'], outTable['Adventures'] = df[0], df[4], df[1]
-        else:
-            outTable['Date'], outTable['Description'], outTable['Adventures'] = df[0], df[4], df[1]
+    for iRow, row in df.iterrows():
+        for c in range(len(keys)):
+            for k, key in enumerate(keys[c]):
+                if key in row[4]:
+                    
+        
+        # if(x in row[4] for i, x in enumerate(skip)):
+        #     continue
+        # elif (x in row[4] for i, x in enumerate(groceriesKey)):
+        #     outTable['Date'], outTable['Description'], outTable['Groceries'] = df[0], grocerisKey, df[1]
+        # elif (x in row[4] for i, x in enumerate(housingKey)):
+        #     outTable['Date'], outTable['Description'], outTable['Housing'] = df[0], df[4], df[1]
+        # elif (x in row[4] for i, x in enumerate(gasKey)):
+        #     outTable['Date'], outTable['Description'], outTable['Gas'] = df[0], df[4], df[1]
+        # elif (x in row[4] for i, x in enumerate(necesitiesKey)):
+        #     outTable['Date'], outTable['Description'], outTable['Necesities'] = df[0], df[4], df[1]
+        # elif (x in row[4] for i, x in enumerate(adventuresKey)):
+        #     outTable['Date'], outTable['Description'], outTable['Adventures'] = df[0], df[4], df[1]
+        # else:
+        #     outTable['Date'], outTable['Description'], outTable['Adventures'] = df[0], df[4], df[1]
 
 # credit sorter
 
