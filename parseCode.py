@@ -29,29 +29,25 @@ def debit(file):
     df = pd.read_csv(statements+"/"+file, header=None)
     df[4] = df[4].str.lower()
     outTable = pd.DataFrame(index=range(len(df.index)-1), columns=['Date', 'Source', 'Description', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Notes'])
-    print(outTable.head())
     skip=["venmo", "discover e-payment"]
     for iRow, row in df.iterrows():
-        for c in range(len(keys)):
-            for k, key in enumerate(keys[c]):
-                if key in row[4]:
+        found = False
+        if (x in row[4] for x in skip):
+            continue
+        else:
+            outTable['Date'].append(row[0])
+            outTable['Source'].append('debit')
+            for c in range(len(keys)):
+                for k, key in enumerate(keys[c]):
+                    if key in row[4]:
+                        outTable['Description'] = key
+                        outTable[[c+3]] = row[1]
+                        found = True
+            if not found:
+                outTable['Unknown'] = row[1]
+                outTable['Notes'] = row[4]
+    return outTable
                     
-        
-        # if(x in row[4] for i, x in enumerate(skip)):
-        #     continue
-        # elif (x in row[4] for i, x in enumerate(groceriesKey)):
-        #     outTable['Date'], outTable['Description'], outTable['Groceries'] = df[0], grocerisKey, df[1]
-        # elif (x in row[4] for i, x in enumerate(housingKey)):
-        #     outTable['Date'], outTable['Description'], outTable['Housing'] = df[0], df[4], df[1]
-        # elif (x in row[4] for i, x in enumerate(gasKey)):
-        #     outTable['Date'], outTable['Description'], outTable['Gas'] = df[0], df[4], df[1]
-        # elif (x in row[4] for i, x in enumerate(necesitiesKey)):
-        #     outTable['Date'], outTable['Description'], outTable['Necesities'] = df[0], df[4], df[1]
-        # elif (x in row[4] for i, x in enumerate(adventuresKey)):
-        #     outTable['Date'], outTable['Description'], outTable['Adventures'] = df[0], df[4], df[1]
-        # else:
-        #     outTable['Date'], outTable['Description'], outTable['Adventures'] = df[0], df[4], df[1]
-
 # credit sorter
 
 # discover sorter
@@ -59,9 +55,12 @@ def debit(file):
 
 # read all files in statements folder
 files = [x[2] for x in os.walk(statements)]
+finalTable = pd.DataFrame(columns=['Date', 'Source', 'Description', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Notes'])
 for f, file in enumerate(files[0]):
     if "debit" in file:
-        debit(file)
+        finalTable = debit(file)
+
+print(finalTable.head())
 
 # get data
 # sort into categories
