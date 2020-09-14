@@ -27,25 +27,30 @@ def debit(file):
     # date, source, description, income, unknown, notes = [], [], [], [], [], []
     # groceries, housing, gas, necesities, adventure, funFood, gifts, shopping, entertainment, other = [], [], [], [], [], [], [], [], []
     df = pd.read_csv(statements+"/"+file, header=None)
+    print(df.head())
     df[4] = df[4].str.lower()
-    outTable = pd.DataFrame(index=range(len(df.index)-1), columns=['Date', 'Source', 'Description', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Notes'])
+    print(df.head())
+    outTable = pd.DataFrame(0,index=range(len(df.index)-1), columns=['Date', 'Source', 'Description', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Notes'])
     skip=["venmo", "discover e-payment"]
     for iRow, row in df.iterrows():
         found = False
-        if (x in row[4] for x in skip):
-            continue
-        else:
-            outTable['Date'].append(row[0])
-            outTable['Source'].append('debit')
-            for c in range(len(keys)):
-                for k, key in enumerate(keys[c]):
-                    if key in row[4]:
-                        outTable['Description'] = key
-                        outTable[[c+3]] = row[1]
-                        found = True
-            if not found:
-                outTable['Unknown'] = row[1]
-                outTable['Notes'] = row[4]
+        print(row[4])
+        outTable['Date'][iRow] = row[0]
+        outTable['Source'][iRow] = 'debit'
+        for c in range(len(keys)):
+            for k, key in enumerate(keys[c]):
+                if key in row[4]:
+                    outTable['Description'][iRow] = key
+                    outTable[[c+3]][iRow] = row[1]
+                    found = True
+        if not found:
+            outTable['Unknown'][iRow] = row[1]
+            outTable['Notes'][iRow] = row[4]
+    for iRow, row in outTable.iterrows():
+        for x in skip:
+            if x in 
+        
+    print(outTable.head())
     return outTable
                     
 # credit sorter
