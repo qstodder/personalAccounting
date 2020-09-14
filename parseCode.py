@@ -48,7 +48,6 @@ def debit(file):
             outTable['Notes'][iRow] = row[4]
     for iRow, row in outTable.iterrows():
         for x in skip:
-            if x in 
         
     print(outTable.head())
     return outTable
