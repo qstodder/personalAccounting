@@ -1,58 +1,65 @@
 #the table will be returned in a list of dataframe,for working with dataframe you need pandas
 import pandas as pd
 import os
+import regex
+import emoji
+import datetime 
 
-statements = r'/Users/quiana/Documents/PersonalFinances/accounting 2.0/statements'
+statements = r'/Users/quiana/Documents/PersonalFinances/accounting 2.0/newStatements'
+allStatements = r'/Users/quiana/Documents/PersonalFinances/accounting 2.0/allStatements.csv'
+
+def addTable(finalTable, addition):
+    if finalTable.size == 0:
+        finalTable = addition
+    else:
+        finalTable = finalTable.append(addition, ignore_index=True)
+    return finalTable
+
+def toDatetime(d, isStandard = True):
+    if isStandard:
+        nums = d.split("/")
+        dateOutput = datetime.datetime(int("20" + nums[2]), int(nums[0]), int(nums[1]))
+    else:
+        dateAndTime = d.split("T")
+        nums = dateAndTime.split("-")
+        dateOutput = datetime.datetime(int(nums[0]), int(nums[1]), int(nums[2]))
+    return dateOutput
+
+def listEmojis(text):
+    emoji_list = []
+    data = regex.findall(r'\X', text)
+    for word in data:
+        if any(char in emoji.UNICODE_EMOJI for char in word):
+            emoji_list.append(word)
+
+    return emoji_list
 
 def keywords():
     incomeKey = ["pasqual", "ucsd apach", "ucsd payrl", "asml", "interest", "deposit", "university of ca"]
-    groceriesKey = ["trader joe's", "ralphs", "vons", "myprotein", "safeway", "food", "milk"]
-    housingKey =   ["premiere", "canyon park", "time warner", "sd gas", "wifi", "state farm", "üè°", "üîå"]   #house
+    groceriesKey = ["trader joe's", "ralph", "vons", "myprotein", "safeway", "food", "milk", "groceries", "fud", "tj's", "snax", "🥒🍅"]
+    housingKey =   ["premiere", "canyon park", "time warner", "sd gas", "sewwer", "insurance", "wifi", "state farm", "rent", "util", "sdge", "🏠", "🚿", "🏡", "💡", "🔌"]  
     gasKey = ["rotten robbie", "7-eleven", "raley's", "valero", "chevron", "arco", "shell", "stars & stripes", "fort independence", " 76 ", "united pacifi",\
-        "circle k", "texaco", "gas"]
+        "circle k", "texaco", "gas", "vroom vroom juice", "gaaaaaas", "⛽"]
     necesitiesKey = ["bookstore", "walmart", "toyota", "cvs", "cyclery", "regents of uc", "parking", "health", "foothill", "postal", "bird app", \
-        "irs treas", "franchise tax", "calibercollision", "doctor", "best buy", "lyft", "home depot", "automotive"]
+        "irs treas", "franchise tax", "calibercollision", "doctor", "best buy", "lyft", "home depot", "automotive", "litter"]
     adventuresKey = ["rei", "mesa", "recreation", "ikon", "backcountry", "steepandcheap", "play it again", "airlines", "sportinggoods", "car rental", "best western"]
     funFoodKey = ["fairbanks", "hdh", "bombay coast", "restaurants", "tajima", "primos", "chipotle", "poki", "rubio's", "ramen", "taco", "ballast point", \
         "rock bottom", "mammoth mtn food", "pete's coffee", "5guys", "mexican", "eatery", "shogun", "pizzeria", "art of espress", "starbucks", "subway", \
-            "thai", "ramen", "creps", "üåØ"] #burrito
+            "thai", "ramen", "creps", "pizza", "yums", "fooood", "lunch","acaii", "chicago 🔥 grill", "😋", "🌯", "🍔", "🍟", "🍺", "🍴", "🍕", "🍹", "🍦", "🍻"]
     giftsKey = ["gofndme", "wpy", "jacquie lawson", "uncommongoods", "happy earth", "bernie", "4 ocean", "etsy"]
     shoppingKey = ["marshalls", "ross", "nordstrom", "wearlively", "dsw", "shopping", "forever 21"]
-    entertainmentKey = ["cinemas", "reel rock", "prime video", "spotify"]
+    entertainmentKey = ["cinemas", "reel rock", "prime video", "spotify", "movie", "🎥"]
     otherKey = ["schwab"]
 
-    return keys = [incomeKey, groceriesKey, housingKey, gasKey, necesitiesKey, adventuresKey, funFoodKey, giftsKey, shoppingKey, entertainmentKey, otherKey]
-
+    keys = [incomeKey, groceriesKey, housingKey, gasKey, necesitiesKey, adventuresKey, funFoodKey, giftsKey, shoppingKey, entertainmentKey, otherKey]
+    return keys
 keys = keywords()
-
-# venmo sorter
-def venmo(file):
-    df = pd.read_csv(statements+"/"+file)
-    df = df[pd.notnull(df["Note"])]
-    df["Note"] = df["Note"].str.lower()
-    outTable = pd.DataFrame(None,index=range(len(df.index)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Details'])
-    for iRow, row in df.iterrows():
-        found = False
-        outTable['Date'][iRow] = row["Datetime"]
-        outTable['Source'][iRow] = 'venmo'
-        outTable['Details'][iRow] = row["Note"]
-        for c in range(len(keys)):
-            for k, key in enumerate(keys[c]):
-                if key in row["Note"]:
-                    outTable['Description'][iRow] = key
-                    outTable.iloc[iRow, c+3] = row["Amount (total)"]
-                    found = True
-        if not found:
-            outTable['Unknown'][iRow] = row["Amount (total)"]
-
-    return outTable
     
-# debit sorter
 def debit(file):
     df = pd.read_csv(statements+"/"+file, header=None)
     df = df[::-1]
     df[4] = df[4].str.lower()
-    outTable = pd.DataFrame(None,index=range(len(df.index)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Details'])
+    outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Details'])
     skip=["venmo", "discover e-payment", "paypal", "online transfer", "wf credit card"]
     for iRow, row in df.iterrows():
         found = False
@@ -75,12 +82,11 @@ def debit(file):
     outTable = outTable[outTable.Date != 0]
     return outTable
                     
-# credit sorter
 def credit(file):
     df = pd.read_csv(statements+"/"+file, header=None)
     df = df[::-1]
     df[4] = df[4].str.lower()
-    outTable = pd.DataFrame(None,index=range(len(df.index)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Details'])
+    outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Details'])
     skip=["automatic payment"]
     for iRow, row in df.iterrows():
         found = False
@@ -102,13 +108,12 @@ def credit(file):
     outTable = outTable[outTable.Date != 0]
     return outTable
 
-# discover sorter
 def discover(file):
     df = pd.read_csv(statements+"/"+file)
     df = df[::-1]
     df["Description"] = df["Description"].str.lower()
     df["Amount"] = -df["Amount"].astype(float)  
-    outTable = pd.DataFrame(None,index=range(len(df.index)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Details'])
+    outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Details'])
     skip=["directpay full", "internet payment", "cashback bonus"]
     for iRow, row in df.iterrows():
         found = False
@@ -146,17 +151,37 @@ def discover(file):
     outTable = outTable[outTable.Date != 0]
     return outTable
 
-def addTable(finalTable, addition):
-    if finalTable.size == 0:
-        finalTable = addition
-    else:
-        finalTable = finalTable.append(addition, ignore_index=True)
-    return finalTable
+def venmo(file):
+    df = pd.read_csv(statements+"/"+file)
+    df = df[pd.notnull(df["Note"])]
+    df = df.reset_index(drop=True)
+    df["Note"] = df["Note"].str.lower()
+    outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Details'])
+    for iRow, row in df.iterrows():
+        found = False
+        outTable['Date'][iRow] = row["Datetime"]
+        outTable['Source'][iRow] = 'venmo'
+        outTable['Details'][iRow] = row["Note"]
+        for c in range(len(keys)):
+            for k, key in enumerate(keys[c]):
+                if key in row["Note"]:
+                    outTable['Description'][iRow] = key
+                    outTable.iloc[iRow, c+3] = row["Amount (total)"]
+                    found = True
+        if not found:
+            outTable['Unknown'][iRow] = row["Amount (total)"]
+            outTable['Details'][iRow] = row["Note"] + (' '.join(thing for thing in [' ', row["From"], row["Type"], row["To"]]))
+            if listEmojis(row["Note"]):
+                emojis = (' '.join(emoji for emoji in listEmojis(row["Note"])))
+                print(row["Note"] + emojis)
+
+
+    return outTable
 
 
 # read all files in statements folder
 files = [x[2] for x in os.walk(statements)]
-finalTable = pd.DataFrame()
+finalTable = pd.read_csv(allStatements)
 for f, file in enumerate(files[0]):
     if "debit" in file:
         debitData = debit(file)
@@ -172,6 +197,15 @@ for f, file in enumerate(files[0]):
         finalTable = addTable(finalTable, venmoData)
 
 print(finalTable.head())
-finalTable.to_csv("allStatements.csv")
+filename = "allStatements_" + str(datetime.date.today()) + ".csv" 
+finalTable.to_csv(filename)
+
+# create analysis: monthly summation
+
+# get all months present in finalTable
+
+# sum all categories for that month
+
+# output as seperate csv
 
 
