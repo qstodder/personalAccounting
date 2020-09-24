@@ -1,2 +1,2 @@
 # personalAccounting
-Uses python to sort debit, credit, and venmo statements into data set. Then uses VBA to create visualization summaries for each month from that dataset. 
+Uses python to sort debit, credit, and venmo statements into a dataset of desired categories. Runs analytics on on-going dataset in order to determine financial trends.

@@ -64,7 +64,7 @@ def debit(file):
     for iRow, row in df.iterrows():
         found = False
         # print(row[4])
-        outTable['Date'][iRow] = row[0]
+        outTable['Date'][iRow] = toDatetime(row[0])
         outTable['Source'][iRow] = 'debit'
         outTable['Details'][iRow] = row[4]
         for c in range(len(keys)):
