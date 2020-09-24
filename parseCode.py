@@ -5,7 +5,7 @@ import regex
 import emoji
 import datetime 
 
-statements = r'/Users/quiana/Documents/PersonalFinances/accounting 2.0/newStatements'
+statements = r'/Users/quiana/Documents/PersonalFinances/accounting 2.0/oldStatements'
 allStatements = r'/Users/quiana/Documents/PersonalFinances/accounting 2.0/allStatements.csv'
 
 def addTable(finalTable, addition):
@@ -15,13 +15,16 @@ def addTable(finalTable, addition):
         finalTable = finalTable.append(addition, ignore_index=True)
     return finalTable
 
-def toDatetime(d, isStandard = True):
+def toDatetime(d, isStandard=True):
     if isStandard:
         nums = d.split("/")
-        dateOutput = datetime.datetime(int("20" + nums[2]), int(nums[0]), int(nums[1]))
+        if len(nums[2])<4:
+            dateOutput = datetime.datetime(int("20" + nums[2]), int(nums[0]), int(nums[1]))
+        else:
+            dateOutput = datetime.datetime(int(nums[2]), int(nums[0]), int(nums[1]))
     else:
         dateAndTime = d.split("T")
-        nums = dateAndTime.split("-")
+        nums = dateAndTime[0].split("-")
         dateOutput = datetime.datetime(int(nums[0]), int(nums[1]), int(nums[2]))
     return dateOutput
 
@@ -90,7 +93,7 @@ def credit(file):
     skip=["automatic payment"]
     for iRow, row in df.iterrows():
         found = False
-        outTable['Date'][iRow] = row[0]
+        outTable['Date'][iRow] = toDatetime(row[0])
         outTable['Source'][iRow] = 'credit'
         outTable['Details'][iRow] = row[4]
         for c in range(len(keys)):
@@ -117,7 +120,7 @@ def discover(file):
     skip=["directpay full", "internet payment", "cashback bonus"]
     for iRow, row in df.iterrows():
         found = False
-        outTable['Date'][iRow] = row["Trans. Date"]
+        outTable['Date'][iRow] = toDatetime(row["Trans. Date"])
         outTable['Source'][iRow] = 'discover'
         outTable['Details'][iRow] = row["Description"]
         for c in range(len(keys)):
@@ -159,7 +162,7 @@ def venmo(file):
     outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Details'])
     for iRow, row in df.iterrows():
         found = False
-        outTable['Date'][iRow] = row["Datetime"]
+        outTable['Date'][iRow] = toDatetime(row["Datetime"], isStandard=False)
         outTable['Source'][iRow] = 'venmo'
         outTable['Details'][iRow] = row["Note"]
         for c in range(len(keys)):
