@@ -3,9 +3,9 @@ import pandas as pd
 import os
 import regex
 import emoji
-import datetime 
+import datetime
 
-statements = r'/Users/quiana/Documents/PersonalFinances/accounting 2.0/oldStatements'
+statements = r'/Users/quiana/Documents/PersonalFinances/accounting 2.0/newStatements'
 allStatements = r'/Users/quiana/Documents/PersonalFinances/accounting 2.0/allStatements.csv'
 
 def addTable(finalTable, addition):
@@ -40,7 +40,7 @@ def listEmojis(text):
 def keywords():
     incomeKey = ["pasqual", "ucsd apach", "ucsd payrl", "asml", "interest", "deposit", "university of ca"]
     groceriesKey = ["trader joe's", "ralph", "vons", "myprotein", "safeway", "food", "milk", "groceries", "fud", "tj's", "snax", "🥒🍅"]
-    housingKey =   ["premiere", "canyon park", "time warner", "sd gas", "sewwer", "insurance", "wifi", "state farm", "rent", "util", "sdge", "🏠", "🚿", "🏡", "💡", "🔌"]  
+    housingKey =   ["premiere", "canyon park", "time warner", "sd gas", "sewwer", "insurance", "wifi", "state farm", "util", "sdge", "🏠", "🚿", "🏡", "💡", "🔌"]  
     gasKey = ["rotten robbie", "7-eleven", "raley's", "valero", "chevron", "arco", "shell", "stars & stripes", "fort independence", " 76 ", "united pacifi",\
         "circle k", "texaco", "gas", "vroom vroom juice", "gaaaaaas", "⛽"]
     necesitiesKey = ["bookstore", "walmart", "toyota", "cvs", "cyclery", "regents of uc", "parking", "health", "foothill", "postal", "bird app", \
@@ -165,14 +165,15 @@ def venmo(file):
         outTable['Date'][iRow] = toDatetime(row["Datetime"], isStandard=False)
         outTable['Source'][iRow] = 'venmo'
         outTable['Details'][iRow] = row["Note"]
+        amount = float(row["Ammount (total)"].replace("$",""))
         for c in range(len(keys)):
             for k, key in enumerate(keys[c]):
                 if key in row["Note"]:
                     outTable['Description'][iRow] = key
-                    outTable.iloc[iRow, c+3] = row["Amount (total)"]
+                    outTable.iloc[iRow, c+3] = amount
                     found = True
         if not found:
-            outTable['Unknown'][iRow] = row["Amount (total)"]
+            outTable['Unknown'][iRow] = amount
             outTable['Details'][iRow] = row["Note"] + (' '.join(thing for thing in [' ', row["From"], row["Type"], row["To"]]))
             if listEmojis(row["Note"]):
                 emojis = (' '.join(emoji for emoji in listEmojis(row["Note"])))
@@ -184,7 +185,7 @@ def venmo(file):
 
 # read all files in statements folder
 files = [x[2] for x in os.walk(statements)]
-finalTable = pd.read_csv(allStatements)
+finalTable = pd.read_csv(allStatements, index_col=0)
 for f, file in enumerate(files[0]):
     if "debit" in file:
         debitData = debit(file)
@@ -204,11 +205,52 @@ filename = "allStatements_" + str(datetime.date.today()) + ".csv"
 finalTable.to_csv(filename)
 
 # create analysis: monthly summation
+dates = pd.to_datetime(finalTable['Date']).sort_values()
+months = dates.dt.strftime("%m/%y").unique().tolist()
 
-# get all months present in finalTable
+aggMonths = pd.DataFrame(None,index=range(len(months)), columns=['Month', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown'])
+aggMonths['Month'] = months
 
-# sum all categories for that month
+finalTable['Date'] = pd.to_datetime(finalTable['Date']).dt.strftime("%m/%y")
+
+
+for i in range(len(aggMonths)):
+    for c in range(len(aggMonths.columns)):
+        if c > 0:
+            aggMonths.iloc[i,c] = finalTable[finalTable['Date'] == months[i]].iloc[:,c+2].astype(float).sum()
+        
+aggMonths['Net'] = aggMonths.iloc[:,1:].sum(axis=1)
+aggMonths['AllSpending'] = aggMonths['Net'] - aggMonths['Income']
+aggMonths['Living'] = aggMonths['Groceries'] + aggMonths['Housing'] + aggMonths['Necesities'] + aggMonths['Gas']
+aggMonths['NonLiving'] = aggMonths['AllSpending'] - aggMonths['Living']
+aggMonths['AvgGroceries'] = [round(num,2) for num in aggMonths['Groceries']/4.5]
+
+print(aggMonths.head())
+# print(months_dt)
+
 
 # output as seperate csv
+filename = "Aggregated Months" + str(datetime.date.today()) + ".csv"
+aggMonths.to_csv(filename, index=False)
 
 
+
+# create analysis: monthly summation
+# dates = pd.to_datetime(finalTable['Date']).sort_values()
+# months_str = dates.dt.strftime("%m/%y").unique().tolist()
+# months_dt = [datetime.datetime(int("20" + d.split('/')[1]), int(d.split('/')[0]), 1) for d in months_str]
+
+# finalTable['Date'] = pd.to_datetime(finalTable['Date']).dt.strftime("%m/%y")
+# finalTable = finalTable.drop(['Source', 'Description', 'Details'], axis=1)
+# print(finalTable.head())
+# aggMonths = finalTable.groupby('Date').sum(min_count=1)
+
+# aggMonths_list = aggMonths['Date'].to_list()
+# aggMonths['Date'] = [datetime.datetime(int("20" + d.split('/')[1]), int(d.split('/')[0]), 1) for d in aggMonths_list]
+
+# print(aggMonths.head())
+
+# aggMonths = pd.DataFrame(None,index=range(len(months_str)), columns=['Month', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown'])
+# aggMonths['Month'] = months_str
+
+# finalTable.groupby()
