@@ -207,9 +207,10 @@ finalTable.to_csv(filename)
 # create analysis: monthly summation
 dates = pd.to_datetime(finalTable['Date']).sort_values()
 months = dates.dt.strftime("%m/%y").unique().tolist()
+months_dt = [datetime.datetime(int("20" + d.split('/')[1]), int(d.split('/')[0]), 1) for d in months]
 
 aggMonths = pd.DataFrame(None,index=range(len(months)), columns=['Month', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown'])
-aggMonths['Month'] = months
+aggMonths['Month'] = months_dt
 
 finalTable['Date'] = pd.to_datetime(finalTable['Date']).dt.strftime("%m/%y")
 
@@ -219,11 +220,14 @@ for i in range(len(aggMonths)):
         if c > 0:
             aggMonths.iloc[i,c] = finalTable[finalTable['Date'] == months[i]].iloc[:,c+2].astype(float).sum()
         
+# Calculate new columns
 aggMonths['Net'] = aggMonths.iloc[:,1:].sum(axis=1)
 aggMonths['AllSpending'] = aggMonths['Net'] - aggMonths['Income']
 aggMonths['Living'] = aggMonths['Groceries'] + aggMonths['Housing'] + aggMonths['Necesities'] + aggMonths['Gas']
 aggMonths['NonLiving'] = aggMonths['AllSpending'] - aggMonths['Living']
 aggMonths['AvgGroceries'] = [round(num,2) for num in aggMonths['Groceries']/4.5]
+aggMonths['AvgFood'] = [round(num,2) for num in (aggMonths['Groceries'] + aggMonths['Fun_Food'])/4.5]
+
 
 print(aggMonths.head())
 # print(months_dt)
@@ -232,25 +236,3 @@ print(aggMonths.head())
 # output as seperate csv
 filename = "Aggregated Months" + str(datetime.date.today()) + ".csv"
 aggMonths.to_csv(filename, index=False)
-
-
-
-# create analysis: monthly summation
-# dates = pd.to_datetime(finalTable['Date']).sort_values()
-# months_str = dates.dt.strftime("%m/%y").unique().tolist()
-# months_dt = [datetime.datetime(int("20" + d.split('/')[1]), int(d.split('/')[0]), 1) for d in months_str]
-
-# finalTable['Date'] = pd.to_datetime(finalTable['Date']).dt.strftime("%m/%y")
-# finalTable = finalTable.drop(['Source', 'Description', 'Details'], axis=1)
-# print(finalTable.head())
-# aggMonths = finalTable.groupby('Date').sum(min_count=1)
-
-# aggMonths_list = aggMonths['Date'].to_list()
-# aggMonths['Date'] = [datetime.datetime(int("20" + d.split('/')[1]), int(d.split('/')[0]), 1) for d in aggMonths_list]
-
-# print(aggMonths.head())
-
-# aggMonths = pd.DataFrame(None,index=range(len(months_str)), columns=['Month', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown'])
-# aggMonths['Month'] = months_str
-
-# finalTable.groupby()
