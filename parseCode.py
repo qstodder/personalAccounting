@@ -62,10 +62,11 @@ def debit(file):
     df = pd.read_csv(statements+"/"+file, header=None)
     df = df[::-1]
     df[4] = df[4].str.lower()
-    outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Details'])
+    outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'NumCategories', 'Details'])
     skip=["venmo", "discover e-payment", "paypal", "online transfer", "wf credit card"]
     for iRow, row in df.iterrows():
         found = False
+        count = 0
         # print(row[4])
         outTable['Date'][iRow] = toDatetime(row[0])
         outTable['Source'][iRow] = 'debit'
@@ -76,11 +77,14 @@ def debit(file):
                     outTable['Description'][iRow] = key
                     outTable.iloc[iRow, c+3] = row[1]
                     found = True
+                    count += 1
         if not found:
             outTable['Unknown'][iRow] = row[1]
+            count += 1
         for x in skip:
             if x in row[4]:
                 outTable['Date'][iRow] = 0
+        outTable['NumCategoreis'] = count
 
     outTable = outTable[outTable.Date != 0]
     return outTable
@@ -93,6 +97,7 @@ def credit(file):
     skip=["automatic payment"]
     for iRow, row in df.iterrows():
         found = False
+        count = 0
         outTable['Date'][iRow] = toDatetime(row[0])
         outTable['Source'][iRow] = 'credit'
         outTable['Details'][iRow] = row[4]
@@ -102,11 +107,14 @@ def credit(file):
                     outTable['Description'][iRow] = key
                     outTable.iloc[iRow, c+3] = row[1]
                     found = True
+                    count += 1
         if not found:
             outTable['Unknown'][iRow] = row[1]
+            count += 1
         for x in skip:
             if x in row[4]:
                 outTable['Date'][iRow] = 0
+        outTable['NumCategoreis'] = count
 
     outTable = outTable[outTable.Date != 0]
     return outTable
@@ -120,6 +128,7 @@ def discover(file):
     skip=["directpay full", "internet payment", "cashback bonus"]
     for iRow, row in df.iterrows():
         found = False
+        count = 0
         outTable['Date'][iRow] = toDatetime(row["Trans. Date"])
         outTable['Source'][iRow] = 'discover'
         outTable['Details'][iRow] = row["Description"]
@@ -129,6 +138,7 @@ def discover(file):
                     outTable['Description'][iRow] = key
                     outTable.iloc[iRow, c+3] = row["Amount"]
                     found = True
+                    count += 1
         if not found:
             if row[4] == "Supermarkets":
                 outTable['Description'][iRow] = "Supermarket"
@@ -147,9 +157,11 @@ def discover(file):
                 outTable['Gas'][iRow] = row["Amount"]
             else:
                 outTable['Unknown'][iRow] = row["Amount"]
+            count += 1
         for x in skip:
             if x in row["Description"]:
                 outTable['Date'][iRow] = 0
+        outTable['NumCategoreis'] = count
 
     outTable = outTable[outTable.Date != 0]
     return outTable
@@ -162,6 +174,7 @@ def venmo(file):
     outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Details'])
     for iRow, row in df.iterrows():
         found = False
+        count = 0
         outTable['Date'][iRow] = toDatetime(row["Datetime"], isStandard=False)
         outTable['Source'][iRow] = 'venmo'
         outTable['Details'][iRow] = row["Note"]
@@ -172,13 +185,15 @@ def venmo(file):
                     outTable['Description'][iRow] = key
                     outTable.iloc[iRow, c+3] = amount
                     found = True
+                    count += 1
         if not found:
+            count += 1
             outTable['Unknown'][iRow] = amount
             outTable['Details'][iRow] = row["Note"] + (' '.join(thing for thing in [' ', row["From"], row["Type"], row["To"]]))
             if listEmojis(row["Note"]):
                 emojis = (' '.join(emoji for emoji in listEmojis(row["Note"])))
                 print(row["Note"] + emojis)
-
+        outTable['NumCategoreis'] = count
 
     return outTable
 
