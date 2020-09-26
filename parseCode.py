@@ -1,11 +1,13 @@
 #the table will be returned in a list of dataframe,for working with dataframe you need pandas
 import pandas as pd
 import os
+import shutil
 import regex
 import emoji
 import datetime
 
 statements = r'/Users/quiana/Documents/PersonalFinances/accounting 2.0/newStatements'
+oldStatements = r'/Users/quiana/Documents/PersonalFinances/accounting 2.0/oldStatements'
 allStatements = r'/Users/quiana/Documents/PersonalFinances/accounting 2.0/allStatements.csv'
 
 def addTable(finalTable, addition):
@@ -38,20 +40,20 @@ def listEmojis(text):
     return emoji_list
 
 def keywords():
-    incomeKey = ["pasqual", "ucsd apach", "ucsd payrl", "asml", "interest", "deposit", "university of ca"]
-    groceriesKey = ["trader joe's", "ralph", "vons", "myprotein", "safeway", "food", "milk", "groceries", "fud", "tj's", "snax", "🥒🍅"]
-    housingKey =   ["premiere", "canyon park", "time warner", "sd gas", "sewwer", "insurance", "wifi", "state farm", "util", "sdge", "🏠", "🚿", "🏡", "💡", "🔌"]  
+    incomeKey = ["pasqual", "ucsd apach", "ucsd payrl", "asml", "interest", "deposit", "university of ca", "payroll"]
+    groceriesKey = ["trader joe", "ralph", "vons", "myprotein", "safeway", "food", "milk", "groceries", "fud", "tj's", "snax", "🥒🍅"]
+    housingKey =   ["premiere", "canyon park", "time warner", "sd gas", "sewwer", "rent", "insurance", "wifi", "state farm", "util", "sdge", "🏠", "🚿", "🏡", "💡", "🔌"]  
     gasKey = ["rotten robbie", "7-eleven", "raley's", "valero", "chevron", "arco", "shell", "stars & stripes", "fort independence", " 76 ", "united pacifi",\
         "circle k", "texaco", "gas", "vroom vroom juice", "gaaaaaas", "⛽"]
-    necesitiesKey = ["bookstore", "walmart", "toyota", "cvs", "cyclery", "regents of uc", "parking", "health", "foothill", "postal", "bird app", \
+    necesitiesKey = ["bookstore", "walmart", "toyota", "cvs", "cyclery", "regents of uc", "parking", "health", "foothill", "chegg", "postal", "bird app", \
         "irs treas", "franchise tax", "calibercollision", "doctor", "best buy", "lyft", "home depot", "automotive", "litter"]
-    adventuresKey = ["rei", "mesa", "recreation", "ikon", "backcountry", "steepandcheap", "play it again", "airlines", "sportinggoods", "car rental", "best western"]
+    adventuresKey = ["rei", "mesa", "recreation", "ikon", "backcountry", "steepandcheap", "play it again", "airlines", "southwestair", "sportinggoods", "car rental", "best western", "hertz"]
     funFoodKey = ["fairbanks", "hdh", "bombay coast", "restaurants", "tajima", "primos", "chipotle", "poki", "rubio's", "ramen", "taco", "ballast point", \
         "rock bottom", "mammoth mtn food", "pete's coffee", "5guys", "mexican", "eatery", "shogun", "pizzeria", "art of espress", "starbucks", "subway", \
-            "thai", "ramen", "creps", "pizza", "yums", "fooood", "lunch","acaii", "chicago 🔥 grill", "😋", "🌯", "🍔", "🍟", "🍺", "🍴", "🍕", "🍹", "🍦", "🍻"]
+            "thai", "ramen", "creps", "pizza", "yums", "fooood", "lunch","acaii", "chicago 🔥 grill", "😋", "🌯", "🍔", "🍟", "🍺", "🍴", "🍕", "🍹", "🍦", "🍻", "🍣"]
     giftsKey = ["gofndme", "wpy", "jacquie lawson", "uncommongoods", "happy earth", "bernie", "4 ocean", "etsy"]
     shoppingKey = ["marshalls", "ross", "nordstrom", "wearlively", "dsw", "shopping", "forever 21"]
-    entertainmentKey = ["cinemas", "reel rock", "prime video", "spotify", "movie", "🎥"]
+    entertainmentKey = ["cinemas", "reel rock", "prime video", "spotify", "movie", "web town square", "🎥"]
     otherKey = ["schwab"]
 
     keys = [incomeKey, groceriesKey, housingKey, gasKey, necesitiesKey, adventuresKey, funFoodKey, giftsKey, shoppingKey, entertainmentKey, otherKey]
@@ -84,7 +86,7 @@ def debit(file):
         for x in skip:
             if x in row[4]:
                 outTable['Date'][iRow] = 0
-        outTable['NumCategoreis'] = count
+        outTable['NumCategories'] = count
 
     outTable = outTable[outTable.Date != 0]
     return outTable
@@ -93,7 +95,7 @@ def credit(file):
     df = pd.read_csv(statements+"/"+file, header=None)
     df = df[::-1]
     df[4] = df[4].str.lower()
-    outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Details'])
+    outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'NumCategories', 'Details'])
     skip=["automatic payment"]
     for iRow, row in df.iterrows():
         found = False
@@ -114,7 +116,7 @@ def credit(file):
         for x in skip:
             if x in row[4]:
                 outTable['Date'][iRow] = 0
-        outTable['NumCategoreis'] = count
+        outTable['NumCategories'] = count
 
     outTable = outTable[outTable.Date != 0]
     return outTable
@@ -124,7 +126,7 @@ def discover(file):
     df = df[::-1]
     df["Description"] = df["Description"].str.lower()
     df["Amount"] = -df["Amount"].astype(float)  
-    outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Details'])
+    outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'NumCategories', 'Details'])
     skip=["directpay full", "internet payment", "cashback bonus"]
     for iRow, row in df.iterrows():
         found = False
@@ -161,7 +163,7 @@ def discover(file):
         for x in skip:
             if x in row["Description"]:
                 outTable['Date'][iRow] = 0
-        outTable['NumCategoreis'] = count
+        outTable['NumCategories'] = count
 
     outTable = outTable[outTable.Date != 0]
     return outTable
@@ -171,14 +173,15 @@ def venmo(file):
     df = df[pd.notnull(df["Note"])]
     df = df.reset_index(drop=True)
     df["Note"] = df["Note"].str.lower()
-    outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'Details'])
+    outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'NumCategories', 'Details'])
     for iRow, row in df.iterrows():
         found = False
         count = 0
         outTable['Date'][iRow] = toDatetime(row["Datetime"], isStandard=False)
         outTable['Source'][iRow] = 'venmo'
         outTable['Details'][iRow] = row["Note"]
-        amount = float(row["Ammount (total)"].replace("$",""))
+        amount = row['Amount (total)']
+        amount = float(amount.replace(" $",""))
         for c in range(len(keys)):
             for k, key in enumerate(keys[c]):
                 if key in row["Note"]:
@@ -193,7 +196,7 @@ def venmo(file):
             if listEmojis(row["Note"]):
                 emojis = (' '.join(emoji for emoji in listEmojis(row["Note"])))
                 print(row["Note"] + emojis)
-        outTable['NumCategoreis'] = count
+        outTable['NumCategories'] = count
 
     return outTable
 
@@ -215,8 +218,11 @@ for f, file in enumerate(files[0]):
         venmoData = venmo(file)
         finalTable = addTable(finalTable, venmoData)
 
+for f, file in enumerate(files[0]):
+    shutil.move(statements+"/"+file, oldStatements+"/"+file)
+
 print(finalTable.head())
-filename = "allStatements_" + str(datetime.date.today()) + ".csv" 
+filename = "allStatements.csv" 
 finalTable.to_csv(filename)
 
 # create analysis: monthly summation
@@ -249,5 +255,5 @@ print(aggMonths.head())
 
 
 # output as seperate csv
-filename = "Aggregated Months" + str(datetime.date.today()) + ".csv"
+filename = "Aggregated Months.csv"
 aggMonths.to_csv(filename, index=False)
