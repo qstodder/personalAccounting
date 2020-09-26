@@ -244,8 +244,8 @@ for i in range(len(aggMonths)):
 # Calculate new columns
 aggMonths['Net'] = aggMonths.iloc[:,1:].sum(axis=1)
 aggMonths['AllSpending'] = aggMonths['Net'] - aggMonths['Income']
-aggMonths['Living'] = aggMonths['Groceries'] + aggMonths['Housing'] + aggMonths['Necesities'] + aggMonths['Gas']
-aggMonths['NonLiving'] = aggMonths['AllSpending'] - aggMonths['Living']
+aggMonths['Living'] = aggMonths['Groceries'] + aggMonths['Housing'] + aggMonths['Gas']
+aggMonths['NonLiving'] = aggMonths['AllSpending'] - aggMonths['Living'] - aggMonths['Necesities']
 aggMonths['AvgGroceries'] = [round(num,2) for num in aggMonths['Groceries']/4.5]
 aggMonths['AvgFood'] = [round(num,2) for num in (aggMonths['Groceries'] + aggMonths['Fun_Food'])/4.5]
 
