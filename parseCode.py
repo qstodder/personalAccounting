@@ -6,9 +6,9 @@ import regex
 import emoji
 import datetime
 
-statements = r'/Users/quiana/Documents/PersonalFinances/accounting 2.0/newStatements'
-oldStatements = r'/Users/quiana/Documents/PersonalFinances/accounting 2.0/oldStatements'
-allStatements = r'/Users/quiana/Documents/PersonalFinances/accounting 2.0/allStatements.csv'
+statements = r'/Users/quiana/Documents/PersonalFinances/accounting/newStatements'
+oldStatements = r'/Users/quiana/Documents/PersonalFinances/accounting/oldStatements'
+allStatements = r'/Users/quiana/Documents/PersonalFinances/accounting/allStatements.csv'
 
 def addTable(finalTable, addition):
     if finalTable.size == 0:
