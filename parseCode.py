@@ -248,9 +248,10 @@ for i in range(len(aggMonths)):
 aggMonths['Net'] = aggMonths.iloc[:,1:].sum(axis=1)
 aggMonths['AllSpending'] = aggMonths['Net'] - aggMonths['Income']
 aggMonths['Living'] = aggMonths['Groceries'] + aggMonths['Housing'] + aggMonths['Gas'] + aggMonths['Necesities']
-aggMonths['NonLiving'] = aggMonths['AllSpending'] - aggMonths['Living']
+aggMonths['NonLiving'] = aggMonths['AllSpending'] - aggMonths['Living'] - aggMonths['Other']
 aggMonths['AvgGroceries'] = [round(num,2) for num in aggMonths['Groceries']/4.5]
 aggMonths['AvgFood'] = [round(num,2) for num in (aggMonths['Groceries'] + aggMonths['Fun_Food'])/4.5]
+
 
 
 print(aggMonths.tail())
