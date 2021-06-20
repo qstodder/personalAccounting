@@ -54,17 +54,25 @@ def keywords():
     giftsKey = ["gofndme", "wpy", "jacquie lawson", "uncommongoods", "happy earth", "bernie", "4 ocean", "etsy"]
     shoppingKey = ["marshalls", "ross", "nordstrom", "wearlively", "dsw", "shopping", "forever 21", "poshmark", "lulus"]
     entertainmentKey = ["cinemas", "reel rock", "prime video", "spotify", "movie", "web town square", "🎥"]
+    travelKey = ["alaska airlines", "hawaiian airlines", "southwestair"]
     otherKey = ["schwab"]
 
-    keys = [incomeKey, groceriesKey, housingKey, gasKey, necesitiesKey, adventuresKey, funFoodKey, giftsKey, shoppingKey, entertainmentKey, otherKey]
+    keys = [incomeKey, groceriesKey, housingKey, gasKey, necesitiesKey, adventuresKey, funFoodKey, giftsKey, shoppingKey, entertainmentKey, travelKey, otherKey]
     return keys
 keys = keywords()
+
+def makeTable(df, agg=False):
+    if agg:
+        outTable = pd.DataFrame(None,index=range(len(df)), columns=['Month', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Travel', 'Other', 'Unknown'])
+    else:
+        outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Travel', 'Other', 'Unknown', 'NumCategories', 'Details'])
+    return outTable
     
 def debit(file):
     df = pd.read_csv(statements+"/"+file, header=None)
     df = df[::-1]
     df[4] = df[4].str.lower()
-    outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'NumCategories', 'Details'])
+    outTable = makeTable(df)
     skip=["venmo", "discover e-payment", "paypal", "online transfer", "wf credit card"]
     for iRow, row in df.iterrows():
         found = False
@@ -94,7 +102,7 @@ def credit(file):
     df = pd.read_csv(statements+"/"+file, header=None)
     df = df[::-1]
     df[4] = df[4].str.lower()
-    outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'NumCategories', 'Details'])
+    outTable = makeTable(df)
     skip=["automatic payment"]
     for iRow, row in df.iterrows():
         found = False
@@ -125,7 +133,7 @@ def discover(file):
     df = df[::-1]
     df["Description"] = df["Description"].str.lower()
     df["Amount"] = -df["Amount"].astype(float)  
-    outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'NumCategories', 'Details'])
+    outTable = makeTable(df)
     skip=["directpay full", "internet payment", "cashback bonus"]
     for iRow, row in df.iterrows():
         found = False
@@ -172,7 +180,7 @@ def venmo(file):
     df = df[pd.notnull(df["Note"])]
     df = df.reset_index(drop=True)
     df["Note"] = df["Note"].str.lower()
-    outTable = pd.DataFrame(None,index=range(len(df)), columns=['Date', 'Source', 'Description', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown', 'NumCategories', 'Details'])
+    outTable = makeTable(df)
     for iRow, row in df.iterrows():
         found = False
         count = 0
@@ -223,7 +231,7 @@ for f, file in enumerate(files[0]):
     shutil.move(statements+"/"+file, oldStatements+"/"+file)
 
 print(finalTable.tail())
-filename = "allStatements.csv" 
+filename = allStatements
 finalTable.to_csv(filename)
 
 # create analysis: monthly summation
@@ -233,12 +241,12 @@ cleanedMonths = [x for x in months if str(x) != 'nan']
 months = cleanedMonths
 months_dt = [datetime.datetime(int("20" + d.split('/')[1]), int(d.split('/')[0]), 1) for d in months]
 
-aggMonths = pd.DataFrame(None,index=range(len(months)), columns=['Month', 'Income', 'Groceries', 'Housing', 'Gas', 'Necesities', 'Adventures', 'Fun_Food', 'Gifts/Charity', 'Shopping', 'Entertainment', 'Other', 'Unknown'])
+aggMonths = makeTable(months, agg=True)
 aggMonths['Month'] = months_dt
 
 finalTable['Date'] = pd.to_datetime(finalTable['Date']).dt.strftime("%m/%y")
 
-
+print(len(aggMonths))
 for i in range(len(aggMonths)):
     for c in range(len(aggMonths.columns)):
         if c > 0:
