@@ -50,7 +50,7 @@ def keywords():
     adventuresKey = ["rei", "mesa", "recreation", "ikon", "backcountry", "steepandcheap", "play it again", "airlines", "southwestair", "sportinggoods", "car rental", "best western", "hertz"]
     funFoodKey = ["fairbanks", "hdh", "bombay coast", "restaurants", "tajima", "primos", "chipotle", "poki", "rubio's", "ramen", "taco", "ballast point", \
         "rock bottom", "mammoth mtn food", "pete's coffee", "5guys", "mexican", "eatery", "shogun", "pizzeria", "art of espress", "starbucks", "subway", \
-            "thai", "ramen", "creps", "pizza", "yums", "fooood", "lunch","acaii", "chicago 🔥 grill", "😋", "🌯", "🍔", "🍟", "🍺", "🍴", "🍕", "🍹", "🍦", "🍻", "🍣"]
+            "thai", "ramen", "creps", "pizza", "yums", "carls jr", "fooood", "lunch","acaii", "chicago 🔥 grill", "😋", "🌯", "🍔", "🍟", "🍺", "🍴", "🍕", "🍹", "🍦", "🍻", "🍣"]
     giftsKey = ["gofndme", "wpy", "jacquie lawson", "uncommongoods", "happy earth", "bernie", "4 ocean", "etsy"]
     shoppingKey = ["marshalls", "ross", "nordstrom", "wearlively", "dsw", "shopping", "forever 21", "poshmark", "lulus"]
     entertainmentKey = ["cinemas", "reel rock", "prime video", "spotify", "movie", "web town square", "🎥"]
