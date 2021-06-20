@@ -6,6 +6,7 @@ import regex
 import emoji
 import datetime
 
+
 statements = r'/Users/quiana/Documents/PersonalFinances/accounting/newStatements'
 oldStatements = r'/Users/quiana/Documents/PersonalFinances/accounting/oldStatements'
 allStatements = r'/Users/quiana/Documents/PersonalFinances/accounting/personalAccounting/allStatements.csv'
